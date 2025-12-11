@@ -22,7 +22,7 @@ export default defineNuxtPlugin(() => {
       z-index: 9999;
     `
         popup.innerHTML = `
-      <p style="margin-bottom:10px;font-size:14px;">Claim discounts, support meals for children, and see your impact in real-time.</p>
+      <p style="margin-bottom:10px;font-size:14px;">Install the app to stay connected and see your impact in real-time.</p>
       <button id="installPwaBtn" style="padding:6px 12px;margin-right:10px;background:#000;color:#fff;border:none;border-radius:5px;">Install</button>
       <button id="dismissPwaBtn" style="padding:6px 12px;background:#ccc;border:none;border-radius:5px;">Later</button>
     `
