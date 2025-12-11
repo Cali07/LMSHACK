@@ -18,7 +18,7 @@
           prepend-icon="mdi-file-download-outline"
           @click="downloadTemplate"
         >
-          Learner template
+          {{ templateLabel }}
         </v-btn>
         <v-chip label prepend-icon="mdi-microsoft-excel" variant="text">XLSX supported</v-chip>
       </div>
@@ -91,7 +91,10 @@
       </v-expand-transition>
 
       <p class="text-body-2 text-medium-emphasis mt-4 mb-0">
-        Required columns: <strong>{{ columns.join(', ') }}</strong>. Optional: Email, Motivation for assessors. First sheet is used. The template includes South African and international examples.
+        Required: <strong>{{ requiredColumns.join(', ') }}</strong>. Optional: <strong>{{ optionalColumns.join(', ') }}</strong>
+        plus Email and Motivation for assessors. Country and document type help with passports but are not mandatory. The
+        template includes South African IDs and international passport examples, and the system handles validation and
+        flagging automatically.
       </p>
     </v-card-text>
   </v-card>
@@ -99,7 +102,7 @@
 
 <script setup>
 import { computed, ref } from 'vue'
-import { downloadLearnerTemplate, parseExcelFile } from '~/utils/excel'
+import { downloadBulkTemplate, parseExcelFile } from '~/utils/excel'
 import { useRegistryStore } from '~/stores/registry'
 
 const props = defineProps({
@@ -121,17 +124,21 @@ const results = ref([])
 const loading = ref(false)
 
 const title = computed(() => (props.target === 'assessors' ? 'Assessors & Moderators' : 'Learners / Students'))
-const columns = computed(() =>
+const templateLabel = computed(() =>
+  props.target === 'assessors' ? 'Assessor/Moderator template' : 'Learner template',
+)
+const requiredColumns = computed(() => ['Name', 'IDNumber or PassportNumber'])
+const optionalColumns = computed(() =>
   props.target === 'assessors'
-    ? ['Name', 'Role (Assessor/Moderator)', 'IDNumber or PassportNumber', 'Country', 'DocumentType']
-    : ['Name', 'IDNumber or PassportNumber', 'Country', 'DocumentType'],
+    ? ['Role (Assessor/Moderator)', 'Country', 'DocumentType']
+    : ['Country', 'DocumentType'],
 )
 
-const showTemplateDownload = computed(() => props.target === 'learners')
+const showTemplateDownload = computed(() => true)
 
 const downloadTemplate = () => {
   if (showTemplateDownload.value) {
-    downloadLearnerTemplate()
+    downloadBulkTemplate(props.target)
   }
 }
 
@@ -156,7 +163,9 @@ const handleUpload = async () => {
     feedback.value = {
       success: successes > 0,
       summary: `Imported ${successes} record(s) · ${failures} skipped`,
-      details: failures ? 'Duplicates or validation issues were skipped' : undefined,
+      details: failures
+        ? 'Duplicates or validation issues were skipped — flagging and verification happen automatically.'
+        : 'Verification will flag any risky IDs after upload.',
     }
   } catch (error) {
     feedback.value = { success: false, summary: 'Could not read the Excel file', details: String(error) }
