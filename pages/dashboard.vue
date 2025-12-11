@@ -243,6 +243,7 @@ const submitFlag = async (reason) => {
 const exportExcel = () => {
   exportRegistryWorkbook({
     assessors: registryStore.assessors,
+    moderators: registryStore.moderators,
     learners: registryStore.learners,
   })
 }

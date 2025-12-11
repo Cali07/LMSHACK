@@ -21,12 +21,14 @@ export function parseExcelFile(file) {
   })
 }
 
-export function exportRegistryWorkbook({ assessors, learners }) {
+export function exportRegistryWorkbook({ assessors, moderators, learners }) {
   const assessorSheet = XLSX.utils.json_to_sheet(assessors)
+  const moderatorSheet = XLSX.utils.json_to_sheet(moderators)
   const learnerSheet = XLSX.utils.json_to_sheet(learners)
 
   const workbook = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(workbook, assessorSheet, 'Assessors & Moderators')
+  XLSX.utils.book_append_sheet(workbook, assessorSheet, 'Assessors')
+  XLSX.utils.book_append_sheet(workbook, moderatorSheet, 'Moderators')
   XLSX.utils.book_append_sheet(workbook, learnerSheet, 'Learners')
 
   const buffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' })
@@ -39,43 +41,59 @@ export function exportRegistryWorkbook({ assessors, learners }) {
   URL.revokeObjectURL(url)
 }
 
-export function downloadLearnerTemplate() {
-  const sheet = XLSX.utils.json_to_sheet([
-    {
-      Name: 'Aisha Mthembu',
-      IDNumber: '9901014800086',
-      PassportNumber: '',
-      Country: 'South Africa',
-      DocumentType: 'ID',
-      Flagged: 'false',
-    },
-    {
-      Name: 'Daniel Okoro',
-      IDNumber: '',
-      PassportNumber: 'A1234567',
-      Country: 'Nigeria',
-      DocumentType: 'Passport',
-      Flagged: 'false',
-    },
-    {
-      Name: 'Ingrid Müller',
-      IDNumber: '',
-      PassportNumber: 'C9876543',
-      Country: 'Germany',
-      DocumentType: 'Passport',
-      Flagged: 'true',
-    },
-  ])
+export function downloadBulkTemplate(target = 'learners') {
+  const isLearner = target === 'learners'
+  const sheet = XLSX.utils.json_to_sheet(
+    isLearner
+      ? [
+          {
+            Name: 'Aisha Mthembu',
+            IDNumber: '9901014800086',
+            PassportNumber: '',
+            Country: 'South Africa',
+            DocumentType: '',
+          },
+          {
+            Name: 'Daniel Okoro',
+            IDNumber: '',
+            PassportNumber: 'A1234567',
+            Country: 'Nigeria',
+            DocumentType: 'Passport',
+          },
+        ]
+      : [
+          {
+            Name: 'Naledi Mokoena',
+            Role: 'Assessor',
+            IDNumber: '9001014800088',
+            PassportNumber: '',
+            Country: 'South Africa',
+            DocumentType: '',
+          },
+          {
+            Name: 'Amelia Govender',
+            Role: 'Moderator',
+            IDNumber: '',
+            PassportNumber: 'P1234567',
+            Country: 'Botswana',
+            DocumentType: 'Passport',
+          },
+        ],
+  )
 
   const workbook = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(workbook, sheet, 'Learner Upload Template')
+  XLSX.utils.book_append_sheet(
+    workbook,
+    sheet,
+    isLearner ? 'Learner Upload Template' : 'Assessor & Moderator Template',
+  )
 
   const buffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' })
   const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
   link.href = url
-  link.download = 'learner-bulk-template.xlsx'
+  link.download = isLearner ? 'learner-bulk-template.xlsx' : 'assessor-moderator-template.xlsx'
   link.click()
   URL.revokeObjectURL(url)
 }

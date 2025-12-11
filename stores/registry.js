@@ -240,7 +240,7 @@ export const useRegistryStore = defineStore('registry', {
         gender: validation.gender,
         status,
         failedReason,
-        flagged: payload.flagged ?? status === 'failed',
+        flagged: status === 'failed',
       }
 
       const saved = await mockRegisterLearner(record)
@@ -315,7 +315,6 @@ export const useRegistryStore = defineStore('registry', {
           passportNumber,
           country,
           documentType,
-          flagged: row.Flagged === 'true' || row.flagged === 'true',
         })
 
         results.push({ name, success: response.success, message: response.message })
