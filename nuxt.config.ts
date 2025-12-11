@@ -7,29 +7,29 @@ export default defineNuxtConfig({
 
   modules: [
     '@pinia/nuxt',
-    '@vite-pwa/nuxt', '@nuxtjs/leaflet',
+    '@vite-pwa/nuxt',
+    '@nuxtjs/leaflet',
     (_options, nuxt) => {
       nuxt.hooks.hook('vite:extendConfig', (config) => {
         // @ts-expect-error
         config.plugins.push(vuetify({ autoImport: true }))
-
       })
     }
   ],
-    leaflet: {
+  leaflet: {
     heat: true
-},
+  },
   pwa: {
     registerType: 'autoUpdate',
     manifest: {
-        name: 'Give & Get',
-        short_name: 'GiveGet AddHope',
-        description: 'Claim discounts, support meals for children, and see your impact in real-time.',
-        display: 'standalone',
-        start_url: '/',
-        background_color: '#ffffff',
-        theme_color: '#E4002B',
-        lang: 'en',
+      name: 'W&RSETA Learner Management',
+      short_name: 'LMS',
+      description: 'Capture learners, assessors, and moderators with verification-ready workflows.',
+      display: 'standalone',
+      start_url: '/',
+      background_color: '#ffffff',
+      theme_color: '#0f172a',
+      lang: 'en',
       icons: [
         { src: '/icons/icon-48x48.png', sizes: '48x48', type: 'image/png' },
         { src: '/icons/icon-72x72.png', sizes: '72x72', type: 'image/png' },
@@ -52,7 +52,7 @@ export default defineNuxtConfig({
     }
   },
 
-  css: ['~/assets/main.css','leaflet/dist/leaflet.css'],
+  css: ['~/assets/main.css', 'leaflet/dist/leaflet.css'],
 
   build: {
     transpile: ['vuetify'],
@@ -72,7 +72,7 @@ export default defineNuxtConfig({
         { rel: 'manifest', href: '/manifest.webmanifest' }
       ],
       meta: [
-        { name: 'theme-color', content: '#4b0082' }
+        { name: 'theme-color', content: '#0f172a' }
       ]
     }
   },
@@ -81,9 +81,7 @@ export default defineNuxtConfig({
     public: {
       API_URL: process.env.API_URL,
       APP_VERSION: process.env.APP_VERSION,
-    SUPABASE_URL: process.env.SUPABASE_URL,
-    SUPABASE_KEY: process.env.SUPABASE_KEY,
-    GEOAPIFY_KEY: process.env.GEOAPIFY_KEY,
+      GEOAPIFY_KEY: process.env.GEOAPIFY_KEY,
     }
   }
 })
