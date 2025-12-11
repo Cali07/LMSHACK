@@ -1,32 +1,7 @@
 import { defineStore } from 'pinia'
 import { mockFlagUpdate, mockRegisterAssessorModerator, mockRegisterLearner } from '~/utils/mockApi'
 
-type IdentityCheck = {
-  valid: boolean
-  isSouthAfrican: boolean
-  age: number | null
-  gender: string
-  reason?: string
-}
-
-type RegistryRecord = {
-  id: string
-  name: string
-  idNumber?: string
-  passportNumber?: string
-  country?: string
-  documentType?: string
-  email?: string
-  motivation?: string
-  role: string
-  age: number | null
-  gender: string
-  status: 'verified' | 'failed' | 'flagged' | 'pending'
-  failedReason?: string
-  flagged: boolean
-}
-
-function calculateAge(dateString: string): number | null {
+function calculateAge(dateString) {
   const today = new Date()
   const birthDate = new Date(dateString)
   if (Number.isNaN(birthDate.getTime())) return null
@@ -67,7 +42,7 @@ export const useRegistryStore = defineStore('registry', {
         email: 'sizwe@example.com',
         motivation: 'Specialist in workplace moderation',
       },
-    ] as RegistryRecord[],
+    ],
     moderators: [
       {
         id: 'MOD-2001',
@@ -82,7 +57,7 @@ export const useRegistryStore = defineStore('registry', {
         email: 'amelia@example.com',
         motivation: 'Accredited moderator across retail learnerships',
       },
-    ] as RegistryRecord[],
+    ],
     learners: [
       {
         id: 'LRN-3001',
@@ -108,7 +83,7 @@ export const useRegistryStore = defineStore('registry', {
         failedReason: 'Non-SA document requires verification',
         flagged: false,
       },
-    ] as RegistryRecord[],
+    ],
   }),
   getters: {
     assessorModeratorList(state) {
@@ -116,7 +91,7 @@ export const useRegistryStore = defineStore('registry', {
     },
   },
   actions: {
-    validateSouthAfricanId(idNumber?: string): IdentityCheck {
+    validateSouthAfricanId(idNumber) {
       if (!idNumber) {
         return {
           valid: false,
@@ -144,9 +119,7 @@ export const useRegistryStore = defineStore('registry', {
       const day = parseInt(birth.substring(4, 6), 10)
       const currentYearTwo = parseInt(new Date().getFullYear().toString().slice(-2), 10)
       const century = year > currentYearTwo ? 1900 : 2000
-      const dateString = `${century + year}-${String(month + 1).padStart(2, '0')}-${
-        String(day).padStart(2, '0')
-      }`
+      const dateString = `${century + year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
       const age = calculateAge(dateString)
       const genderDigits = parseInt(cleaned.substring(6, 10), 10)
       const gender = Number.isNaN(genderDigits) ? 'Unspecified' : genderDigits >= 5000 ? 'Male' : 'Female'
@@ -165,16 +138,7 @@ export const useRegistryStore = defineStore('registry', {
       }
     },
 
-    async registerAssessorOrModerator(payload: {
-      name: string
-      idNumber?: string
-      passportNumber?: string
-      country?: string
-      documentType?: string
-      email?: string
-      motivation?: string
-      role: 'Assessor' | 'Moderator'
-    }) {
+    async registerAssessorOrModerator(payload) {
       const validation = this.validateSouthAfricanId(payload.idNumber)
       const identifier = payload.idNumber || payload.passportNumber
 
@@ -196,11 +160,7 @@ export const useRegistryStore = defineStore('registry', {
         }
       }
 
-      const status: RegistryRecord['status'] = validation.valid
-        ? 'verified'
-        : validation.isSouthAfrican
-          ? 'failed'
-          : 'pending'
+      const status = validation.valid ? 'verified' : validation.isSouthAfrican ? 'failed' : 'pending'
 
       const failedReason =
         status === 'failed'
@@ -209,7 +169,7 @@ export const useRegistryStore = defineStore('registry', {
             ? 'Identity verification required for non-South African document'
             : ''
 
-      const record: RegistryRecord = {
+      const record = {
         id: '',
         name: payload.name,
         idNumber: payload.idNumber,
@@ -237,14 +197,7 @@ export const useRegistryStore = defineStore('registry', {
       return { success: true, record: saved }
     },
 
-    async registerLearner(payload: {
-      name: string
-      idNumber?: string
-      passportNumber?: string
-      country?: string
-      documentType?: string
-      flagged?: boolean
-    }) {
+    async registerLearner(payload) {
       const validation = this.validateSouthAfricanId(payload.idNumber)
       const identifier = payload.idNumber || payload.passportNumber
 
@@ -266,11 +219,7 @@ export const useRegistryStore = defineStore('registry', {
         }
       }
 
-      const status: RegistryRecord['status'] = validation.valid
-        ? 'verified'
-        : validation.isSouthAfrican
-          ? 'failed'
-          : 'pending'
+      const status = validation.valid ? 'verified' : validation.isSouthAfrican ? 'failed' : 'pending'
 
       const failedReason =
         status === 'failed'
@@ -279,7 +228,7 @@ export const useRegistryStore = defineStore('registry', {
             ? 'Identity verification required for non-South African document'
             : ''
 
-      const record: RegistryRecord = {
+      const record = {
         id: '',
         name: payload.name,
         idNumber: payload.idNumber,
@@ -299,8 +248,8 @@ export const useRegistryStore = defineStore('registry', {
       return { success: true, record: saved }
     },
 
-    async flagRecord(collection: 'assessors' | 'moderators' | 'learners', id: string, reason: string) {
-      const group = this[collection] as RegistryRecord[]
+    async flagRecord(collection, id, reason) {
+      const group = this[collection]
       const target = group.find((entry) => entry.id === id)
       if (!target) return { success: false, message: 'Record not found' }
 
@@ -310,6 +259,69 @@ export const useRegistryStore = defineStore('registry', {
 
       await mockFlagUpdate(target)
       return { success: true, record: target }
+    },
+
+    async bulkRegisterAssessors(rows) {
+      const results = []
+
+      for (const row of rows) {
+        const name = row.Name || row.name
+        const idNumber = row.IDNumber || row.idNumber
+        const passportNumber = row.PassportNumber || row.passportNumber
+        const country = row.Country || row.country
+        const documentType = row.DocumentType || row.documentType
+        const role = row.Role || row.role || 'Assessor'
+
+        if (!name) {
+          results.push({ name, success: false, message: 'Missing name' })
+          continue
+        }
+
+        const response = await this.registerAssessorOrModerator({
+          name,
+          idNumber,
+          passportNumber,
+          country,
+          documentType,
+          email: row.Email || row.email,
+          motivation: row.Motivation || row.motivation,
+          role,
+        })
+
+        results.push({ name, success: response.success, message: response.message })
+      }
+
+      return results
+    },
+
+    async bulkRegisterLearners(rows) {
+      const results = []
+
+      for (const row of rows) {
+        const name = row.Name || row.name
+        const idNumber = row.IDNumber || row.idNumber
+        const passportNumber = row.PassportNumber || row.passportNumber
+        const country = row.Country || row.country
+        const documentType = row.DocumentType || row.documentType
+
+        if (!name) {
+          results.push({ name, success: false, message: 'Missing name' })
+          continue
+        }
+
+        const response = await this.registerLearner({
+          name,
+          idNumber,
+          passportNumber,
+          country,
+          documentType,
+          flagged: row.Flagged === 'true' || row.flagged === 'true',
+        })
+
+        results.push({ name, success: response.success, message: response.message })
+      }
+
+      return results
     },
   },
 })
