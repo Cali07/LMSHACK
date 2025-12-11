@@ -46,7 +46,8 @@
             </v-btn>
           </v-form>
           <div class="mt-4 text-body-2 text-medium-emphasis">
-            Demo credentials: <strong>admin</strong> / <strong>12345678</strong>
+
+            
           </div>
         </v-card>
       </v-col>
